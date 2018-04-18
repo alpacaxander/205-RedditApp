@@ -1,0 +1,36 @@
+
+config.py
+__pycache__
+.ipynb_checkpoints
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.manifest
+*.spec
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Rope project settings
+.ropeproject
+
+# Mac files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows files
+[Dd]esktop.ini
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.lnk
