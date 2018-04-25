@@ -1,7 +1,8 @@
 import sys 
 import api
+import urllib
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PIL import Image
 
@@ -84,8 +85,9 @@ class MyWindow(QMainWindow):
 		
 		media = QVBoxLayout()
 		self.mediatitle = QLabel(title)
+		self.media = QLabel('this will be image')
 		media.addWidget(self.mediatitle)
-		media.addWidget(QLabel('this will be image')) # TODO make function that returns widget with media
+		media.addWidget(self.media) # TODO make function that returns widget with media
 		mediabox = QGroupBox('')
 		mediabox.setLayout(media)
 		
@@ -114,7 +116,13 @@ class MyWindow(QMainWindow):
 		return QGroupBox('Footer Title')
 	@pyqtSlot()
 	def changemedia(self):
+		#print(self.posts[currindex]['thumbnail'])
 		self.mediatitle.setText(self.posts[self.currindex]['title'])
+		data = urllib.request.urlopen(self.posts[self.currindex]['url']).read()
+		
+		pixmap = QPixmap()
+		pixmap.loadFromData(data)
+		self.media.setPixmap(pixmap)
 		
 	def prevmedia(self):
 		if self.currindex > 0:
@@ -128,7 +136,8 @@ class MyWindow(QMainWindow):
 		
 	def submitlogin(self):
 		self.display_simple_layout()
-		self.posts = api.getFrontPage(count=10)
+		self.posts = api.getPosts('PICS', count=50)
+		self.changemedia()
 		return
 
 def main():
