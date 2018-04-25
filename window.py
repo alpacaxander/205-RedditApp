@@ -1,5 +1,5 @@
 import sys 
-import api
+#import api
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import *
@@ -128,7 +128,7 @@ class MyWindow(QMainWindow):
 		
 	def submitlogin(self):
 		self.display_simple_layout()
-		self.posts = api.getFrontPage(count=10)
+		#self.posts = api.getFrontPage(count=10)
 		return
 
 def main():
