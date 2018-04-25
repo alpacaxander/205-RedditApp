@@ -1,19 +1,54 @@
 import sys 
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QComboBox, QHBoxLayout, QGroupBox, QLineEdit
+import api
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import *
 from PIL import Image
 
 dict = {}
 
-class MyWindow(QWidget):
+class MyWindow(QMainWindow):
 	def __init__(self):
 		super().__init__()
 		self.posts = [{'title': '1st'},{'title': '2st'},{'title': '3st'},{'title': '4st'},{'title': '5st'},{'title': '6st'},{'title': '7st'}]
 		self.currindex = 0
-		mbox = QVBoxLayout()
-		mbox.addWidget(self.login())
-		self.setLayout(mbox)
+		self.stacked_layout = QStackedLayout()
+		self.stacked_layout.addWidget(self.login())
+		self.stacked_layout.addWidget(self.simple_layout())
+		self.central_widget = QWidget()
+		self.central_widget.setLayout(self.stacked_layout)
+		self.setCentralWidget(self.central_widget)
+		
+	def display_simple_layout(self):
+		self.setWindowTitle("Simple Reddit Lauout - Group 10")
+		self.setWindowIcon(QIcon("icon.png"))
+		self.setGeometry(100,100,700,500)
+		self.stacked_layout.setCurrentIndex(1)
+	
+	def simple_layout(self):
+		#Simple Layout is housed in a vertical Layout
+		vert = QVBoxLayout()
+		#header is a vertical layout that holds the header info
+		header = QHBoxLayout()
+		#contentBox holds the content and the side bar
+		contentBox = QHBoxLayout()
+		#footerBox holds the footer
+		footerBox = QHBoxLayout()
+		#adding widgets to the layouts
+		#.addWidget(widget, weight of the layout)
+		header.addWidget(self.header())
+		contentBox.addWidget(self.sideBar() , 1)
+		contentBox.addWidget(self.content() , 5)
+		footerBox.addWidget(self.footer())
+		#adding the layouts to the main "vert" layout
+		#.addLayout(layout , weight of the layout)
+		vert.addLayout(header , 1)
+		vert.addLayout(contentBox ,14)
+		vert.addLayout(footerBox , 1)
+		
+		simplebox = QGroupBox('')
+		simplebox.setLayout(vert)
+		return simplebox
 		
 	def login(self):
 		login = QVBoxLayout()
@@ -73,9 +108,10 @@ class MyWindow(QWidget):
 		gbox.setLayout(vbox)
 		return gbox
 	
-	def successfullogin(self):
-		return
-		
+	def sideBar(self):
+		return QGroupBox('SideBar Title')
+	def footer(self):
+		return QGroupBox('Footer Title')
 	@pyqtSlot()
 	def changemedia(self):
 		self.mediatitle.setText(self.posts[self.currindex]['title'])
@@ -91,6 +127,8 @@ class MyWindow(QWidget):
 		self.changemedia()
 		
 	def submitlogin(self):
+		self.display_simple_layout()
+		self.posts = api.getFrontPage(count=10)
 		return
 
 def main():
