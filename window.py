@@ -1,8 +1,10 @@
-import sys 
-#import api
+import sys
+import api
+import urllib
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5 import *
 from PIL import Image
 
 dict = {}
@@ -18,14 +20,15 @@ class MyWindow(QMainWindow):
 		self.central_widget = QWidget()
 		self.central_widget.setLayout(self.stacked_layout)
 		self.setCentralWidget(self.central_widget)
-		
+
 	def display_simple_layout(self):
 		self.setWindowTitle("Simple Reddit Lauout - Group 10")
 		self.setWindowIcon(QIcon("icon.png"))
-		self.setGeometry(100,100,700,500)
+		self.setGeometry(100,100,720,500)
 		self.stacked_layout.setCurrentIndex(1)
-	
-	def simple_layout(self):
+
+	def simple_layout(self,):
+
 		#Simple Layout is housed in a vertical Layout
 		vert = QVBoxLayout()
 		#header is a vertical layout that holds the header info
@@ -45,24 +48,35 @@ class MyWindow(QMainWindow):
 		vert.addLayout(header , 1)
 		vert.addLayout(contentBox ,14)
 		vert.addLayout(footerBox , 1)
-		
+
 		simplebox = QGroupBox('')
 		simplebox.setLayout(vert)
 		return simplebox
-		
+
 	def login(self):
+		#The login screen is fixed to this width/height
+		self.setFixedWidth(230)
+		self.setFixedHeight(200)
 		login = QVBoxLayout()
 		self.username = QLineEdit()
 		self.password = QLineEdit()
+		self.username.setFixedWidth(200)
+		self.password.setFixedWidth(200)
+		self.usernameLabel = QLabel("Username : ")
+		self.passwordLabel = QLabel("Password : ")
 		submit = QPushButton('submit')
 		submit.clicked.connect(self.submitlogin)
+		submit.setFixedWidth(200)
+		submit.setFixedHeight(40)
+		login.addWidget(self.usernameLabel)
 		login.addWidget(self.username)
+		login.addWidget(self.passwordLabel)
 		login.addWidget(self.password)
 		login.addWidget(submit)
 		loginbox = QGroupBox('')
 		loginbox.setLayout(login)
 		return loginbox
-		
+
 	def content(self, title='this is title'):
 		voting = QVBoxLayout()
 		upvote = QPushButton('upvote')
@@ -71,7 +85,7 @@ class MyWindow(QMainWindow):
 		voting.addWidget(downvote)
 		votingbox = QGroupBox('')
 		votingbox.setLayout(voting)
-		
+
 		vbox = QVBoxLayout()
 		prev = QPushButton('prev')
 		next = QPushButton('next')
@@ -81,21 +95,22 @@ class MyWindow(QMainWindow):
 		vbox.addWidget(next)
 		controlbox = QGroupBox('')
 		controlbox.setLayout(vbox)
-		
+
 		media = QVBoxLayout()
 		self.mediatitle = QLabel(title)
+		self.media = QLabel('this will be image')
 		media.addWidget(self.mediatitle)
-		media.addWidget(QLabel('this will be image')) # TODO make function that returns widget with media
+		media.addWidget(self.media) # TODO make function that returns widget with media
 		mediabox = QGroupBox('')
 		mediabox.setLayout(media)
-		
+
 		content = QHBoxLayout()
 		content.addWidget(controlbox)
 		content.addWidget(votingbox)
 		content.addWidget(mediabox)
 		self.contentbox = QGroupBox('')
 		self.contentbox.setLayout(content)
-		
+
 		# add button to open image
 		# add button to go to post on reddit
 		return self.contentbox
@@ -107,15 +122,30 @@ class MyWindow(QMainWindow):
 		gbox = QGroupBox('')
 		gbox.setLayout(vbox)
 		return gbox
-	
+
 	def sideBar(self):
 		return QGroupBox('SideBar Title')
 	def footer(self):
-		return QGroupBox('Footer Title')
+		vbox = QVBoxLayout()
+		contentlabel = QLabel('this is footer label')
+		vbox.addWidget(contentlabel)
+		gbox = QGroupBox('')
+		gbox.setLayout(vbox)
+		return gbox
 	@pyqtSlot()
 	def changemedia(self):
+		#print(self.posts[currindex]['thumbnail'])
 		self.mediatitle.setText(self.posts[self.currindex]['title'])
-		
+		#Set label to word wrap, so it doesnt mess up the size of the layout (and for aesthetic reasons)
+		self.mediatitle.setWordWrap(True)
+		data = urllib.request.urlopen(self.posts[self.currindex]['url']).read()
+
+		pixmap = QPixmap()
+		pixmap.loadFromData(data)
+		#fixedPixmap is to change the size of the media, default (1280, 720)
+		fixedPixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.FastTransformation)
+		self.media.setPixmap(fixedPixmap)
+
 	def prevmedia(self):
 		if self.currindex > 0:
 			self.currindex -= 1
@@ -125,10 +155,14 @@ class MyWindow(QMainWindow):
 		if self.currindex < len(self.posts):
 			self.currindex += 1
 		self.changemedia()
-		
+
 	def submitlogin(self):
+		#The screen is fixed to this width/height
+		self.setFixedWidth(720)
+		self.setFixedHeight(600)
 		self.display_simple_layout()
-		#self.posts = api.getFrontPage(count=10)
+		self.posts = api.getPosts('PICS', count=50)
+		self.changemedia()
 		return
 
 def main():
@@ -136,6 +170,6 @@ def main():
 	win = MyWindow()
 	win.show()
 	sys.exit(app.exec_())
-	
+
 if __name__ == '__main__':
 	main()
