@@ -26,6 +26,9 @@ def getPosts(sub, count=None): # Add sort parameter?
   posts = [i.__dict__ for i in list(reddit.subreddit(sub).hot(limit=count))]
   return posts
 
+def searchPosts(query, sub='all', order='relevance'):
+  return [post.__dict__ for post in reddit.subreddit(sub).search(query, sort=order)]
+
 # Returns an array of top-level comments each with an array of replies
 def getComments(postID):
     post = reddit.submission(id=postID)
