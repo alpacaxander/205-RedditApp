@@ -12,7 +12,7 @@ dict = {}
 class MyWindow(QMainWindow):
 	def __init__(self):
 		super().__init__()
-		self.posts = [{'title': '1st'},{'title': '2st'},{'title': '3st'},{'title': '4st'},{'title': '5st'},{'title': '6st'},{'title': '7st'}]
+		self.settings = {'subreddits': ['PICS', 'GIFS', 'VIDEOS']}
 		self.currindex = 0
 		self.stacked_layout = QStackedLayout()
 		self.stacked_layout.addWidget(self.login())
@@ -28,7 +28,6 @@ class MyWindow(QMainWindow):
 		self.stacked_layout.setCurrentIndex(1)
 
 	def simple_layout(self,):
-
 		#Simple Layout is housed in a vertical Layout
 		vert = QVBoxLayout()
 		#header is a vertical layout that holds the header info
@@ -120,15 +119,29 @@ class MyWindow(QMainWindow):
 		return self.contentbox
 
 	def header(self):
-		vbox = QVBoxLayout()
-		contentlabel = QLabel('this is header label')
-		vbox.addWidget(contentlabel)
+		subreddits = api.getSubreddits()
+		self.subredditbuttons = QHBoxLayout()
+		for r in subreddits:
+			temp = QPushButton(r['title'])
+			temp.clicked.connect(self.setsubreddit)
+			self.subredditbuttons.addWidget(temp)
+		
 		gbox = QGroupBox('')
-		gbox.setLayout(vbox)
+		gbox.setLayout(self.subredditbuttons)
 		return gbox
 
-	def sideBar(self):
-		return QGroupBox('SideBar Title')
+	def sideBar(self):		
+		self.inputsubreddit = QLineEdit()
+		self.inputsubreddit.setFixedWidth(200)
+		add = QPushButton('Add Subreddit')
+		add.clicked.connect(self.addsubreddit)
+		vbox = QVBoxLayout()
+		vbox.addWidget(self.inputsubreddit)
+		vbox.addWidget(add)
+		gbox = QGroupBox()
+		gbox.setLayout(vbox)
+		return gbox
+		
 	def footer(self):
 		vbox = QVBoxLayout()
 		contentlabel = QLabel('this is footer label')
@@ -137,6 +150,13 @@ class MyWindow(QMainWindow):
 		gbox.setLayout(vbox)
 		return gbox
 	@pyqtSlot()
+	def addsubreddit(self):
+		newsub = self.inputsubreddit.text().upper()
+		self.settings['subreddits'].append(newsub)
+		button = QPushButton('-' + newsub)
+		button.clicked.connect(self.setsubreddit)
+		self.subredditbuttons.addWidget(button)
+
 	def changemedia(self):
 		print(self.posts[self.currindex]['url'])
 		self.mediatitle.setText(self.posts[self.currindex]['title'])
@@ -182,6 +202,15 @@ class MyWindow(QMainWindow):
 		self.posts = api.getPosts('GIFS', count=10)
 		self.changemedia()
 		return
+		
+	def setsubreddit(self):
+		if self.sender().text()[0] == '-' :
+			self.settings['subreddits'].remove(self.sender().text()[1:])
+			self.sender().setText(self.sender().text()[1:])
+		else:
+			self.settings['subreddits'].append(self.sender().text())
+			self.sender().setText('-' + self.sender().text())
+			
 
 def main():
 	app = QApplication(sys.argv)
