@@ -96,13 +96,17 @@ class MyWindow(QMainWindow):
 		controlbox = QGroupBox('')
 		controlbox.setLayout(vbox)
 
-		media = QVBoxLayout()
+		vmedia = QVBoxLayout()
 		self.mediatitle = QLabel(title)
+		self.mediatitle.setWordWrap(True)#Set label to word wrap, so it doesnt mess up the size of the layout (and for aesthetic reasons)
 		self.media = QLabel('this will be image')
-		media.addWidget(self.mediatitle)
-		media.addWidget(self.media) # TODO make function that returns widget with media
+		
+		
+		
+		vmedia.addWidget(self.mediatitle)
+		vmedia.addWidget(self.media) # TODO make function that returns widget with media
 		mediabox = QGroupBox('')
-		mediabox.setLayout(media)
+		mediabox.setLayout(vmedia)
 
 		content = QHBoxLayout()
 		content.addWidget(controlbox)
@@ -134,18 +138,25 @@ class MyWindow(QMainWindow):
 		return gbox
 	@pyqtSlot()
 	def changemedia(self):
-		#print(self.posts[currindex]['thumbnail'])
 		self.mediatitle.setText(self.posts[self.currindex]['title'])
 
-		#Set label to word wrap, so it doesnt mess up the size of the layout (and for aesthetic reasons)
-		self.mediatitle.setWordWrap(True)
+		urllib.request.urlretrieve(self.posts[self.currindex]['url'], 'temp.gif')
+		'''
+		movie = QMovie('temp.gif', QByteArray(), self)
+		movie.setCacheMode(QMovie.CacheAll)
+		movie.setSpeed(100)
+		self.media.setMovie(movie)
+		movie.start()
+		movie.loopCount()
+		'''
+		'''
 		data = urllib.request.urlopen(self.posts[self.currindex]['url']).read()
-
 		pixmap = QPixmap()
 		pixmap.loadFromData(data)
 		#fixedPixmap is to change the size of the media, default (1280, 720)
 		fixedPixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.FastTransformation)
 		self.media.setPixmap(fixedPixmap)
+		'''
 
 	def prevmedia(self):
 		if self.currindex > 0:
@@ -153,7 +164,7 @@ class MyWindow(QMainWindow):
 		self.changemedia()
 
 	def nextmedia(self):
-		if self.currindex < len(self.posts):
+		if self.currindex < len(self.posts) - 1:
 			self.currindex += 1
 		self.changemedia()
 
@@ -162,7 +173,7 @@ class MyWindow(QMainWindow):
 		self.setFixedWidth(720)
 		self.setFixedHeight(600)
 		self.display_simple_layout()
-		self.posts = api.getPosts('PICS', count=50)
+		self.posts = api.getPosts('GIFS', count=5)
 		self.changemedia()
 		return
 
