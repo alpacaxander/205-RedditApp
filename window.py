@@ -1,6 +1,6 @@
 import sys
 import api
-import urllib
+from urllib.request import Request, urlopen
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -138,25 +138,31 @@ class MyWindow(QMainWindow):
 		return gbox
 	@pyqtSlot()
 	def changemedia(self):
+		print(self.posts[self.currindex]['url'])
 		self.mediatitle.setText(self.posts[self.currindex]['title'])
-
-		urllib.request.urlretrieve(self.posts[self.currindex]['url'], 'temp.gif')
 		'''
+		urllib.request.urlretrieve(self.posts[self.currindex]['url'].read(), 'temp.gif')
+		
 		movie = QMovie('temp.gif', QByteArray(), self)
 		movie.setCacheMode(QMovie.CacheAll)
 		movie.setSpeed(100)
 		self.media.setMovie(movie)
 		movie.start()
 		movie.loopCount()
+		
 		'''
-		'''
-		data = urllib.request.urlopen(self.posts[self.currindex]['url']).read()
+		hdr = { 'User-Agent' : 'Just a final project' }
+		req = Request(self.posts[self.currindex]['url'], headers=hdr)
+		data = urlopen(req).read()
 		pixmap = QPixmap()
 		pixmap.loadFromData(data)
+		#if (pixmap.isNull()): # this will link to the imgur image rather than the imgurs page
+		#	data = urlopen(self.posts[self.currindex]['url'] + '.jpg').read()
+		#	pixmap.loadFromData(data)
 		#fixedPixmap is to change the size of the media, default (1280, 720)
 		fixedPixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.FastTransformation)
 		self.media.setPixmap(fixedPixmap)
-		'''
+		
 
 	def prevmedia(self):
 		if self.currindex > 0:
@@ -173,7 +179,7 @@ class MyWindow(QMainWindow):
 		self.setFixedWidth(720)
 		self.setFixedHeight(600)
 		self.display_simple_layout()
-		self.posts = api.getPosts('GIFS', count=5)
+		self.posts = api.getPosts('GIFS', count=10)
 		self.changemedia()
 		return
 
