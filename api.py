@@ -31,24 +31,25 @@ def searchPosts(query, sub='all', order='relevance'):
 
 # Returns an array of top-level comments each with an array of replies
 def getComments(postID):
-    post = reddit.submission(id=postID)
-    post.comments.replace_more(limit=None)
-    comments = []
-    queue = post.comments[:]
-    while queue:
-      comment = queue.pop(0)
-      comments.append(comment.__dict__)
-      queue.extend(comment.replies)
-    comments.reverse()
-    for i in comments:
-      i['replies'] = []
-    parent = comments[0]['parent_id'].split('_')[1]
-    while parent != postID:
-      for j in comments:
-        parent = comments[0]['parent_id'].split('_')[1]
-        if parent == j['id']:
-          j['replies'].append(comments[0])
-          del comments[0]
+  post = reddit.submission(id=postID)
+  post.comments.replace_more(limit=None)
+  comments = []
+  queue = post.comments[:]
+  while queue:
+    comment = queue.pop(0)
+    d = comment.__dict__
+    d['replies'] = []
+    comments.append(d)
+    queue.extend(comment.replies)
+  comments.reverse()
+  parent = comments[0]['parent_id'].split('_')[1]
+  while parent != postID:
+    for j in comments:
+      parent = comments[0]['parent_id'].split('_')[1]
+      if parent == j['id']:
+        j['replies'].append(comments[0])
+        del comments[0]
+          
 
 # Uvotes the post or comment cooresponding to the specified ID
 def upvote(postID):
