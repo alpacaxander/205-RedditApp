@@ -1,6 +1,6 @@
 import sys
 import api
-import urllib
+from urllib.request import Request, urlopen
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -12,7 +12,8 @@ dict = {}
 class MyWindow(QMainWindow):
 	def __init__(self):
 		super().__init__()
-		self.posts = [{'title': '1st'},{'title': '2st'},{'title': '3st'},{'title': '4st'},{'title': '5st'},{'title': '6st'},{'title': '7st'}]
+		self.settings = {'subreddits': ['PICS', 'GIFS', 'VIDEOS']}
+
 		self.currindex = 0
 		self.stacked_layout = QStackedLayout()
 		self.stacked_layout.addWidget(self.login())
@@ -24,11 +25,10 @@ class MyWindow(QMainWindow):
 	def display_simple_layout(self):
 		self.setWindowTitle("Simple Reddit Lauout - Group 10")
 		self.setWindowIcon(QIcon("icon.png"))
-		self.setGeometry(100,100,720,500)
+		self.setGeometry(100,100,1000,720)
 		self.stacked_layout.setCurrentIndex(1)
 
-	def simple_layout(self,):
-
+	def simple_layout(self):
 		#Simple Layout is housed in a vertical Layout
 		vert = QVBoxLayout()
 		#header is a vertical layout that holds the header info
@@ -39,7 +39,11 @@ class MyWindow(QMainWindow):
 		footerBox = QHBoxLayout()
 		#adding widgets to the layouts
 		#.addWidget(widget, weight of the layout)
-		header.addWidget(self.header())
+		scroll = QScrollArea()
+		scroll.setWidgetResizable(True)
+		scroll.setFixedHeight(60)
+		scroll.setWidget(self.header())
+		header.addWidget(scroll)
 		contentBox.addWidget(self.sideBar() , 1)
 		contentBox.addWidget(self.content() , 5)
 		footerBox.addWidget(self.footer())
@@ -55,9 +59,11 @@ class MyWindow(QMainWindow):
 
 	def login(self):
 		#The login screen is fixed to this width/height
-		self.setFixedWidth(230)
-		self.setFixedHeight(200)
+		#self.setFixedWidth(230)
+		#self.setFixedHeight(200)
+		#self.setGeometry(100,100,230,200)
 		login = QVBoxLayout()
+
 		self.username = QLineEdit()
 		self.password = QLineEdit()
 		self.username.setFixedWidth(200)
@@ -96,13 +102,17 @@ class MyWindow(QMainWindow):
 		controlbox = QGroupBox('')
 		controlbox.setLayout(vbox)
 
-		media = QVBoxLayout()
+		vmedia = QVBoxLayout()
 		self.mediatitle = QLabel(title)
+		self.mediatitle.setWordWrap(True)#Set label to word wrap, so it doesnt mess up the size of the layout (and for aesthetic reasons)
 		self.media = QLabel('this will be image')
-		media.addWidget(self.mediatitle)
-		media.addWidget(self.media) # TODO make function that returns widget with media
+
+
+
+		vmedia.addWidget(self.mediatitle)
+		vmedia.addWidget(self.media) # TODO make function that returns widget with media
 		mediabox = QGroupBox('')
-		mediabox.setLayout(media)
+		mediabox.setLayout(vmedia)
 
 		content = QHBoxLayout()
 		content.addWidget(controlbox)
@@ -116,15 +126,29 @@ class MyWindow(QMainWindow):
 		return self.contentbox
 
 	def header(self):
-		vbox = QVBoxLayout()
-		contentlabel = QLabel('this is header label')
-		vbox.addWidget(contentlabel)
+		subreddits = api.getSubreddits()
+		self.subredditbuttons = QHBoxLayout()
+		for r in subreddits:
+			temp = QPushButton(r['title'])
+			temp.clicked.connect(self.setsubreddit)
+			self.subredditbuttons.addWidget(temp)
+
 		gbox = QGroupBox('')
-		gbox.setLayout(vbox)
+		gbox.setLayout(self.subredditbuttons)
 		return gbox
 
 	def sideBar(self):
-		return QGroupBox('SideBar Title')
+		self.inputsubreddit = QLineEdit()
+		self.inputsubreddit.setFixedWidth(200)
+		add = QPushButton('Add Subreddit')
+		add.clicked.connect(self.addsubreddit)
+		vbox = QVBoxLayout()
+		vbox.addWidget(self.inputsubreddit)
+		vbox.addWidget(add)
+		gbox = QGroupBox()
+		gbox.setLayout(vbox)
+		return gbox
+
 	def footer(self):
 		vbox = QVBoxLayout()
 		contentlabel = QLabel('this is footer label')
@@ -133,18 +157,39 @@ class MyWindow(QMainWindow):
 		gbox.setLayout(vbox)
 		return gbox
 	@pyqtSlot()
-	def changemedia(self):
-		#print(self.posts[currindex]['thumbnail'])
-		self.mediatitle.setText(self.posts[self.currindex]['title'])
-		#Set label to word wrap, so it doesnt mess up the size of the layout (and for aesthetic reasons)
-		self.mediatitle.setWordWrap(True)
-		data = urllib.request.urlopen(self.posts[self.currindex]['url']).read()
+	def addsubreddit(self):
+		newsub = self.inputsubreddit.text().upper()
+		self.settings['subreddits'].append(newsub)
+		button = QPushButton('-' + newsub)
+		button.clicked.connect(self.setsubreddit)
+		self.subredditbuttons.addWidget(button)
 
+	def changemedia(self):
+		print(self.posts[self.currindex]['url'])
+		self.mediatitle.setText(self.posts[self.currindex]['title'])
+		'''
+		urllib.request.urlretrieve(self.posts[self.currindex]['url'].read(), 'temp.gif')
+
+		movie = QMovie('temp.gif', QByteArray(), self)
+		movie.setCacheMode(QMovie.CacheAll)
+		movie.setSpeed(100)
+		self.media.setMovie(movie)
+		movie.start()
+		movie.loopCount()
+
+		'''
+		hdr = { 'User-Agent' : 'Just a final project' }
+		req = Request(self.posts[self.currindex]['url'], headers=hdr)
+		data = urlopen(req).read()
 		pixmap = QPixmap()
 		pixmap.loadFromData(data)
+		#if (pixmap.isNull()): # this will link to the imgur image rather than the imgurs page
+		#	data = urlopen(self.posts[self.currindex]['url'] + '.jpg').read()
+		#	pixmap.loadFromData(data)
 		#fixedPixmap is to change the size of the media, default (1280, 720)
 		fixedPixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.FastTransformation)
 		self.media.setPixmap(fixedPixmap)
+
 
 	def prevmedia(self):
 		if self.currindex > 0:
@@ -152,18 +197,28 @@ class MyWindow(QMainWindow):
 		self.changemedia()
 
 	def nextmedia(self):
-		if self.currindex < len(self.posts):
+		if self.currindex < len(self.posts) - 1:
 			self.currindex += 1
 		self.changemedia()
 
 	def submitlogin(self):
 		#The screen is fixed to this width/height
-		self.setFixedWidth(720)
-		self.setFixedHeight(600)
+		#self.setFixedWidth(720)
+		#self.setFixedHeight(600)
+
 		self.display_simple_layout()
-		self.posts = api.getPosts('PICS', count=50)
+		self.posts = api.getPosts('GIFS', count=10)
 		self.changemedia()
 		return
+
+	def setsubreddit(self):
+		if self.sender().text()[0] == '-' :
+			self.settings['subreddits'].remove(self.sender().text()[1:])
+			self.sender().setText(self.sender().text()[1:])
+		else:
+			self.settings['subreddits'].append(self.sender().text())
+			self.sender().setText('-' + self.sender().text())
+
 
 def main():
 	app = QApplication(sys.argv)
