@@ -49,7 +49,7 @@ def getComments(postID):
       if parent == j['id']:
         j['replies'].append(comments[0])
         del comments[0]
-          
+
 
 # Uvotes the post or comment cooresponding to the specified ID
 def upvote(postID):
@@ -59,8 +59,15 @@ def upvote(postID):
 # Downvotes the post or comment cooresponding to the specified ID
 def downvote(postID):
   post = reddit.submission(id=postID)
-  post.downvote();
+  post.downvote()
 
+# Subscribes the user to the specified subreddit
+def subscribe(sub):
+  reddit.subreddit(sub).subscribe()
+
+# Unsubscribes the user from the specified subreddit
+def unsubscribe(sub):
+  reddit.subreddit(sub).unsubscribe()
 
 # Submits a text post to the specified subreddit
 def submitPost(sub, title, content=''):
@@ -70,7 +77,7 @@ def submitPost(sub, title, content=''):
 def submitLink(sub, title, link='https://reddit.com'):
   reddit.subreddit(sub).submit(title, url=link)
 
-# Submits a comment on a known post and returns a boolean value indicating whether the comment was posted
+# Submits a comment on a known post and returns a boolean value indicating whether the comment was posted successfully
 def submitComment(postID, comment):
   post = reddit.submission(url='https://www.reddit.com/comments/'+postID)
   try:
