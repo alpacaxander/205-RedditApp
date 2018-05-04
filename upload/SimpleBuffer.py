@@ -46,7 +46,7 @@ class Buffer:
 ####__init__#################################################################
 #############################################################################
     def __init__(self, dicter, directory):
-        for i in range(0,len(example_dict)):
+        for i in range(0,len(dicter)):
             print(dicter[i]['id'])
             print(dicter[i]['url'])
             url = dicter[i]['url']
