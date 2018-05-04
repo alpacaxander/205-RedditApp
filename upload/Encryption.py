@@ -1,11 +1,25 @@
+#############################################################################
 # Author: Kyle Hays
 # Date: 4/25/2018
 # requirements: cryptography
-# abstract: This function encrypt takes in a username and password as strings and encrypts it to a plain text file.
-#           The text can then be decrypted using the decrypt function and is returned as a list of 2 strings.
+# abstract: This function encrypt takes in a username and password as strings
+#           and encrypts it to a plain text file.
+#           The text can then be decrypted using the decrypt function and is
+#           returned as a list of 2 strings.
+#############################################################################
+
+
+###imports###################################################################
 from cryptography.fernet import Fernet
 import getpass
+#############################################################################
 
+
+####encrypt##################################################################
+# This method takes in two string objects to be encrypted.
+# The strings are saved in a text file called user.txt
+# The key for decryption is saved as info.txt
+#############################################################################
 def encrypt(username, password):
     key = Fernet.generate_key()
     cipher_suite = Fernet(key)
@@ -28,7 +42,11 @@ def encrypt(username, password):
     print("Encryption complete")
 
 
-
+###decrypt###################################################################
+# This method takes no arguments and decrypts the encrypted strings.
+# The method will find the key from the info.txt file.
+# It will decrypt the strings and return them as a list of two strings.
+#############################################################################
 def decrypt():
     in_key = open("info.txt", "rb")
     key = in_key.read()
@@ -43,13 +61,12 @@ def decrypt():
     for item in split_list:
         decrypt_list.append(cipher_suite.decrypt(item).decode('utf-8'))
 
-    print("Here is the decryted items:")
-    print(decrypt_list)
 
-
-##Use the following code for testing purposes.##
+###Test Code#################################################################
 # username = input("Enter your username: ")
 # password = getpass.getpass("Enter your password: ")
 #
 # encrypt(username,password)
-# decrypt()
+# items = decrypt()
+# print(items)
+#############################################################################
