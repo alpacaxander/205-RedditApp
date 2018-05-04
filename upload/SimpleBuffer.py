@@ -58,7 +58,7 @@ class Buffer:
                 os.makedirs(directory_new)
             else:
                 print("Directory exists: " + directory_new)
-            self.download_video(url, id)
+            self.download_video(url, id, directory)
 
 ###download_video############################################################
 # This method takes in a url for youtube_dl to download.
@@ -68,12 +68,12 @@ class Buffer:
 # NOTE: there is an extra space at the beginning of each title to deal with
 #       the escappe character in the filename directory causing issues.
 #############################################################################
-    def download_video(self, url, id):
+    def download_video(self, url, id, directory):
 
         ydl_opts ={
             'verbose': True,
             'format': 'mp4',
-            'outtmpl': 'Videos\ ' + id +  '.%(ext)s',
+            'outtmpl': directory + '\ ' + id +  '.%(ext)s',
             'noplaylist': True,
         }
         try:
@@ -114,7 +114,7 @@ class Buffer:
 # NOTE: update will only keep the items in the dictonary passed to it;
 #       the update method is self cleaning
 #############################################################################
-    def update(self, dicter):
+    def update(self, dicter, directory):
         list = []
         for i in range(0,len(dicter)):
             print(dicter[i]['id'])
@@ -122,12 +122,12 @@ class Buffer:
             url = dicter[i]['url']
             id = dicter[i]['id']
             list.append(" " + dicter[i]['id'] + ".mp4")
-            self.download_video(url, id)
+            self.download_video(url, id, directory)
         self.clear_library(list)
 
 
 ###Test of program###########################################################
 # Comment these out when running the program; this code is for testing.
 buffin = Buffer(example_dict, "\Videos")
-buffin.update(example2_dict)
+buffin.update(example2_dict, "\Videos")
 #############################################################################
