@@ -128,6 +128,6 @@ class Buffer:
 
 ###Test of program###########################################################
 # Comment these out when running the program; this code is for testing.
-buffin = Buffer(example_dict, "\Videos")
-buffin.update(example2_dict, "\Videos")
+#buffin = Buffer(example_dict, "\Videos")
+#buffin.update(example2_dict, "\Videos")
 #############################################################################
