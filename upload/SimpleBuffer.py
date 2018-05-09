@@ -73,7 +73,7 @@ class Buffer:
         ydl_opts ={
             'verbose': True,
             'format': 'mp4',
-            'outtmpl': directory + '\ ' + id +  '.%(ext)s',
+            'outtmpl': directory + '\\' + id +  '.%(ext)s',
             'noplaylist': True,
         }
         try:
