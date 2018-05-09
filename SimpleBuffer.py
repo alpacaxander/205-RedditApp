@@ -46,13 +46,13 @@ class Buffer:
 ####__init__#################################################################
 #############################################################################
     def __init__(self, dicter, directory):
-        for i in range(0,len(dicter)):
+        for i in range(len(dicter)):
             print(dicter[i]['id'])
             print(dicter[i]['url'])
             url = dicter[i]['url']
             id = dicter[i]['id']
             cwd = os.getcwd()
-            directory_new = cwd + directory
+            directory_new = os.path.join(cwd, directory)
             if not os.path.exists(directory_new):
                 print("Making new directory: " + directory_new)
                 os.makedirs(directory_new)
@@ -73,7 +73,7 @@ class Buffer:
         ydl_opts ={
             'verbose': True,
             'format': 'mp4',
-            'outtmpl': directory + '\ ' + id +  '.%(ext)s',
+            'outtmpl': directory + '\\' + id +  '.%(ext)s',
             'noplaylist': True,
         }
         try:

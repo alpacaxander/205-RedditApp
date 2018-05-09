@@ -26,7 +26,6 @@ def getPosts(sub, count=None): # Add sort parameter?
   posts = [i.__dict__ for i in list(reddit.subreddit(sub).hot(limit=count))]
   return posts
 
-
 # Submits a text post to the specified subreddit
 def submitPost(sub, title, content=''):
   reddit.subreddit(sub).submit(title, selftext=link)

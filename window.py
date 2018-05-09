@@ -1,10 +1,15 @@
 import sys
 import api
+import os
 from urllib.request import Request, urlopen
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5 import *
+from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
+from PyQt5.QtMultimediaWidgets import QVideoWidget
+import VideoWindow
+import SimpleBuffer
 from PIL import Image
 
 dict = {}
@@ -53,9 +58,6 @@ class MyWindow(QMainWindow):
 		return simplebox
 
 	def login(self):
-		#The login screen is fixed to this width/height
-		self.setFixedWidth(230)
-		self.setFixedHeight(200)
 		login = QVBoxLayout()
 		self.username = QLineEdit()
 		self.password = QLineEdit()
@@ -95,17 +97,15 @@ class MyWindow(QMainWindow):
 		controlbox = QGroupBox('')
 		controlbox.setLayout(vbox)
 
-		vmedia = QVBoxLayout()
-		self.mediatitle = QLabel(title)
-		self.mediatitle.setWordWrap(True)#Set label to word wrap, so it doesnt mess up the size of the layout (and for aesthetic reasons)
-		self.media = QLabel('this will be image')
+		self.ImageLabel = QLabel()
+		self.VideoWindow = VideoWindow.VideoWindow(self)
 		
+		self.stacked_media_layout = QStackedLayout()
+		self.stacked_media_layout.addWidget(self.VideoWindow)
+		self.stacked_media_layout.addWidget(self.ImageLabel)
 		
-		
-		vmedia.addWidget(self.mediatitle)
-		vmedia.addWidget(self.media) # TODO make function that returns widget with media
 		mediabox = QGroupBox('')
-		mediabox.setLayout(vmedia)
+		mediabox.setLayout(self.stacked_media_layout)
 
 		content = QHBoxLayout()
 		content.addWidget(controlbox)
@@ -149,7 +149,7 @@ class MyWindow(QMainWindow):
 		gbox = QGroupBox('')
 		gbox.setLayout(vbox)
 		return gbox
-	@pyqtSlot()
+		
 	def addsubreddit(self):
 		newsub = self.inputsubreddit.text().upper()
 		self.settings['subreddits'].append(newsub)
@@ -158,31 +158,22 @@ class MyWindow(QMainWindow):
 		self.subredditbuttons.addWidget(button)
 
 	def changemedia(self):
-		print(self.posts[self.currindex]['url'])
-		self.mediatitle.setText(self.posts[self.currindex]['title'])
-		'''
-		urllib.request.urlretrieve(self.posts[self.currindex]['url'].read(), 'temp.gif')
-		
-		movie = QMovie('temp.gif', QByteArray(), self)
-		movie.setCacheMode(QMovie.CacheAll)
-		movie.setSpeed(100)
-		self.media.setMovie(movie)
-		movie.start()
-		movie.loopCount()
-		
-		'''
-		hdr = { 'User-Agent' : 'Just a final project' }
-		req = Request(self.posts[self.currindex]['url'], headers=hdr)
-		data = urlopen(req).read()
-		pixmap = QPixmap()
-		pixmap.loadFromData(data)
-		#if (pixmap.isNull()): # this will link to the imgur image rather than the imgurs page
-		#	data = urlopen(self.posts[self.currindex]['url'] + '.jpg').read()
-		#	pixmap.loadFromData(data)
-		#fixedPixmap is to change the size of the media, default (1280, 720)
-		fixedPixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.FastTransformation)
-		self.media.setPixmap(fixedPixmap)
-		
+		if os.path.exists('media\\' + self.posts[self.currindex]['id'] + '.mp4'):
+			self.VideoWindow.openFile('media\\' + self.posts[self.currindex]['id'] + '.mp4')
+			self.stacked_media_layout.setCurrentIndex(0)
+		else:
+			hdr = { 'User-Agent' : 'Just a final project' }
+			req = Request(self.posts[self.currindex]['url'], headers=hdr)
+			data = urlopen(req).read()
+			pixmap = QPixmap()
+			pixmap.loadFromData(data)
+			if (pixmap.isNull()): # this will link to the imgur image rather than the imgurs page
+				data = urlopen(self.posts[self.currindex]['url'] + '.jpg').read()
+				pixmap.loadFromData(data)
+			#fixedPixmap is to change the size of the media, default (1280, 720)
+			fixedPixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.FastTransformation)
+			self.ImageLabel.setPixmap(fixedPixmap)
+			self.stacked_media_layout.setCurrentIndex(1)
 
 	def prevmedia(self):
 		if self.currindex > 0:
@@ -195,11 +186,9 @@ class MyWindow(QMainWindow):
 		self.changemedia()
 
 	def submitlogin(self):
-		#The screen is fixed to this width/height
-		self.setFixedWidth(720)
-		self.setFixedHeight(600)
 		self.display_simple_layout()
-		self.posts = api.getPosts('GIFS', count=10)
+		self.posts = api.getPosts('VIDEOS', count=10)
+		self.buf = SimpleBuffer.Buffer(self.posts, 'media')
 		self.changemedia()
 		return
 		
