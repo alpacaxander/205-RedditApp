@@ -17,7 +17,7 @@ dict = {}
 class MyWindow(QMainWindow):
 	def __init__(self):
 		super().__init__()
-		self.settings = {'subreddits': ['PICS', 'GIFS', 'VIDEOS']}
+		self.settings = {'subreddits': []}
 		self.currindex = 0
 		self.stacked_layout = QStackedLayout()
 		self.stacked_layout.addWidget(self.login())
@@ -119,27 +119,28 @@ class MyWindow(QMainWindow):
 		return self.contentbox
 
 	def header(self):
-		subreddits = api.getSubreddits()
-		self.subredditbuttons = QHBoxLayout()
-		for r in subreddits:
-			temp = QPushButton(r['title'])
-			temp.clicked.connect(self.setsubreddit)
-			self.subredditbuttons.addWidget(temp)
+		self.addSub = QLineEdit()
+		addSubButton = QPushButton('Add Sub')
+		addSubButton.clicked.connect(self.addSubReddit)
+		
+		headerContainer = QHBoxLayout()
+		headerContainer.addWidget(self.addSub)
+		headerContainer.addWidget(addSubButton)
 		
 		gbox = QGroupBox('')
-		gbox.setLayout(self.subredditbuttons)
+		gbox.setLayout(headerContainer)
 		return gbox
 
-	def sideBar(self):		
-		self.inputsubreddit = QLineEdit()
-		self.inputsubreddit.setFixedWidth(200)
-		add = QPushButton('Add Subreddit')
-		add.clicked.connect(self.addsubreddit)
-		vbox = QVBoxLayout()
-		vbox.addWidget(self.inputsubreddit)
-		vbox.addWidget(add)
+	def sideBar(self):
+		subreddits = api.getSubreddits()
+		self.subRedditButtons = QVBoxLayout()
+		for r in subreddits:
+			temp = QPushButton(r['url'][3:-1])
+			temp.clicked.connect(self.removeSubReddit)
+			self.subRedditButtons.addWidget(temp)
+
 		gbox = QGroupBox()
-		gbox.setLayout(vbox)
+		gbox.setLayout(self.subRedditButtons)
 		return gbox
 		
 	def footer(self):
@@ -150,11 +151,11 @@ class MyWindow(QMainWindow):
 		gbox.setLayout(vbox)
 		return gbox
 		
-	def addsubreddit(self):
-		newsub = self.inputsubreddit.text().upper()
+	def addSubReddit(self):
+		newsub = self.addSub.text().upper()
 		self.settings['subreddits'].append(newsub)
-		button = QPushButton('-' + newsub)
-		button.clicked.connect(self.setsubreddit)
+		button = QPushButton(newsub)
+		button.clicked.connect(self.removeSubreddit)
 		self.subredditbuttons.addWidget(button)
 
 	def changemedia(self):
@@ -188,18 +189,14 @@ class MyWindow(QMainWindow):
 	def submitlogin(self):
 		self.display_simple_layout()
 		self.posts = api.getPosts('VIDEOS', count=10)
-		self.buf = SimpleBuffer.Buffer(self.posts, 'media')
+		#self.buf = SimpleBuffer.Buffer(self.posts, 'media')
 		self.changemedia()
 		return
-		
-	def setsubreddit(self):
-		if self.sender().text()[0] == '-' :
-			self.settings['subreddits'].remove(self.sender().text()[1:])
-			self.sender().setText(self.sender().text()[1:])
-		else:
-			self.settings['subreddits'].append(self.sender().text())
-			self.sender().setText('-' + self.sender().text())
-			
+
+	def removeSubReddit(self):
+		self.settings['subreddits'].remove(self.sender().text())
+		self.subRedditButtons.removeWidget(self.sender())
+		self.sender().deleteLater()
 
 def main():
 	app = QApplication(sys.argv)
