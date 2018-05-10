@@ -2,14 +2,25 @@ import praw
 from config import creds
 
 reddit = praw.Reddit(client_id=creds['id'],
-                     client_secret=creds['secret'],
+                     client_secret=creds['secret'], 
                      password=creds['password'],
-                     user_agent=creds['user_agent'],
+                     user_agent=creds['user_agent'], 
                      username=creds['username'])
 
 # Returns a dictionary containing attributes for the current user
 def getUser():
   return reddit.user.me()
+
+# Returns the username on successful login and false if not
+def login(user, pwd):
+  global reddit
+  reddit = praw.Reddit(client_id=creds['id'],
+                       client_secret=creds['secret'], password=pwd,
+                       user_agent=creds['user_agent'], username=user)
+  try:
+    return getUser()
+  except:
+    return False
 
 # Returns a list of the posts on the user's front page as dictionaries
 def getFrontPage(count=None):
