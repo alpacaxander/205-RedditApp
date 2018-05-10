@@ -136,6 +136,7 @@ class MyWindow(QMainWindow):
 		self.subRedditButtons = QVBoxLayout()
 		for r in subreddits:
 			temp = QPushButton(r['url'][3:-1])
+			self.settings['subreddits'].append(r['url'][3:-1])
 			temp.clicked.connect(self.removeSubReddit)
 			self.subRedditButtons.addWidget(temp)
 
@@ -155,10 +156,11 @@ class MyWindow(QMainWindow):
 		newsub = self.addSub.text().upper()
 		self.settings['subreddits'].append(newsub)
 		button = QPushButton(newsub)
-		button.clicked.connect(self.removeSubreddit)
-		self.subredditbuttons.addWidget(button)
+		button.clicked.connect(self.removeSubReddit)
+		self.subRedditButtons.addWidget(button)
 
 	def changemedia(self):
+		print(self.posts[self.currindex]['url'])
 		if os.path.exists('media\\' + self.posts[self.currindex]['id'] + '.mp4'):
 			self.VideoWindow.openFile('media\\' + self.posts[self.currindex]['id'] + '.mp4')
 			self.stacked_media_layout.setCurrentIndex(0)
@@ -168,9 +170,9 @@ class MyWindow(QMainWindow):
 			data = urlopen(req).read()
 			pixmap = QPixmap()
 			pixmap.loadFromData(data)
-			if (pixmap.isNull()): # this will link to the imgur image rather than the imgurs page
-				data = urlopen(self.posts[self.currindex]['url'] + '.jpg').read()
-				pixmap.loadFromData(data)
+			#if (pixmap.isNull()): # this will link to the imgur image rather than the imgurs page
+			#	data = urlopen(Request(self.posts[self.currindex]['url'] + '.jpg', headers=hdr)).read()
+			#	pixmap.loadFromData(data)
 			#fixedPixmap is to change the size of the media, default (1280, 720)
 			fixedPixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.FastTransformation)
 			self.ImageLabel.setPixmap(fixedPixmap)
@@ -187,9 +189,13 @@ class MyWindow(QMainWindow):
 		self.changemedia()
 
 	def submitlogin(self):
+		print(self.settings)
 		self.display_simple_layout()
-		self.posts = api.getPosts('VIDEOS', count=10)
-		#self.buf = SimpleBuffer.Buffer(self.posts, 'media')
+		self.posts = []
+		self.posts = api.getPosts('GIFS', count=20)
+		#for i in self.settings['subreddits']:
+		#	self.posts.extend(api.getPosts(i, count=2))
+		self.buf = SimpleBuffer.Buffer(self.posts, 'media')
 		self.changemedia()
 		return
 
