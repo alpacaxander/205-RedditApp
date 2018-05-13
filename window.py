@@ -12,6 +12,7 @@ from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 import VideoWindow
 import SimpleBuffer
+import webbrowser
 from PIL import Image
 
 dict = {}
@@ -125,9 +126,7 @@ class MyWindow(QMainWindow):
 		content.addWidget(mediabox)
 		self.contentbox = QGroupBox('')
 		self.contentbox.setLayout(content)
-
-		# add button to open image
-		# add button to go to post on reddit
+		
 		return self.contentbox
 
 	def header(self):
@@ -158,10 +157,14 @@ class MyWindow(QMainWindow):
 		
 	def footer(self):
 		vbox = QVBoxLayout()
-		contentlabel = QLabel('this is footer label')
+		contentlabel = QLabel()
 		vbox.addWidget(contentlabel)
+		linkButton = QPushButton('See post on reddit')
+		linkButton.clicked.connect(self.hyperlink)
+		vbox.addWidget(linkButton)
 		gbox = QGroupBox('')
 		gbox.setLayout(vbox)
+		
 		return gbox
 		
 	def addSubReddit(self):
@@ -204,6 +207,9 @@ class MyWindow(QMainWindow):
 			self.currindex += 1
 		self.changemedia()
 
+	def hyperlink(self):
+		webbrowser.open(self.posts[self.currindex]['url'])
+	
 	def submitlogin(self):
 		print(self.settings)
 		self.display_simple_layout()
