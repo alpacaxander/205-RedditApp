@@ -1,9 +1,27 @@
-# Reddit Desktop App
+<img src="https://user-images.githubusercontent.com/16360374/39964432-58da66a6-5639-11e8-94fc-72d43b774829.png" height="80"/>  
+
+<p align="right"><a href="https://www.python.org/downloads/release/python-360/"><img src="https://img.shields.io/badge/Python-3.6-blue.svg"/></a></p>  
+
+A Python-based application that allows users to browse their favorite subreddits from the comfort of a desktop app.
 
 ## Install
-The program dependencies can be installed via the following command:
+
+You can download and install the app via the following commands:  
 ```sh
+# Clone the repository
+git clone https://github.com/tterb/205-RedditApp
+
+# Navigate to the directory
+cd 205-RedditApp
+
+# Install program dependencies
 pip install -r requirements.txt
 ```
 
-## Usage
+## Usage  
+
+
+## Contributors
+
+| [<img src="https://avatars1.githubusercontent.com/u/16360374?s=460&v=4" width="100px;"/><br /><sub><b>Brett Stevenson</b></sub>](https://github.com/tterb)<br /> | [<img src="https://avatars2.githubusercontent.com/u/38229188?s=400&v=4" width="100px;"/><br /><sub><b>Kyle Hayes</b></sub>](https://github.com/CruddyShad0w)<br /> | [<img src="https://avatars1.githubusercontent.com/u/36285651?s=460&v=4" width="100px;"/><br /><sub><b>Alex Paulsell</b></sub>](https://github.com/alpacaxander)<br /> | [<img src="https://avatars3.githubusercontent.com/u/16011201?s=460&v=4" width="100px;"/><br /><sub><b>Anthony Zerka</b></sub>](https://github.com/tonyNugget)<br />|
+|:----:|:----:|:----:|:----:|
