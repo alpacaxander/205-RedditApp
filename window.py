@@ -163,8 +163,9 @@ class MyWindow(QMainWindow):
 
 	def changemedia(self):
 		print(self.posts[self.currindex]['url'])
-		if os.path.exists('media\\' + self.posts[self.currindex]['id'] + '.mp4'):
-			self.VideoWindow.openFile('media\\' + self.posts[self.currindex]['id'] + '.mp4')
+		dir = os.path.join(os.path.curdir, 'media', self.posts[self.currindex]['id'] + '.mp4')
+		if os.path.exists(dir):
+			self.VideoWindow.openFile(dir)
 			self.stacked_media_layout.setCurrentIndex(0)
 		else:
 			hdr = { 'User-Agent' : 'Just a final project' }

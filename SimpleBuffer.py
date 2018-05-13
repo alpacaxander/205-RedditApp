@@ -69,11 +69,11 @@ class Buffer:
 #       the escappe character in the filename directory causing issues.
 #############################################################################
     def download_video(self, url, id, directory):
-
+        dir = os.path.join(directory, id + '.%(ext)s')
         ydl_opts ={
             'verbose': True,
             'format': 'mp4',
-            'outtmpl': directory + '\\' + id +  '.%(ext)s',
+            'outtmpl': dir,
             'noplaylist': True,
         }
         try:
