@@ -99,6 +99,8 @@ class MyWindow(QMainWindow):
 		controlbox = QGroupBox('')
 		controlbox.setLayout(vbox)
 
+		self.title = QLabel()
+		
 		self.ImageLabel = QLabel()
 		self.VideoWindow = VideoWindow.VideoWindow(self)
 		
@@ -106,8 +108,16 @@ class MyWindow(QMainWindow):
 		self.stacked_media_layout.addWidget(self.VideoWindow)
 		self.stacked_media_layout.addWidget(self.ImageLabel)
 		
+		mediaBox = QGroupBox('')
+		mediaBox.setLayout(self.stacked_media_layout)
+		
+		
+		contentVbox = QVBoxLayout()
+		contentVbox.addWidget(self.title)
+		contentVbox.addWidget(mediaBox)
+		
 		mediabox = QGroupBox('')
-		mediabox.setLayout(self.stacked_media_layout)
+		mediabox.setLayout(contentVbox)
 
 		content = QHBoxLayout()
 		content.addWidget(controlbox)
@@ -162,9 +172,12 @@ class MyWindow(QMainWindow):
 		self.subRedditButtons.addWidget(button)
 
 	def changemedia(self):
-		print(self.posts[self.currindex]['url'])
+		self.title.setText(self.posts[self.currindex]['title'])
 		dir = os.path.join(os.path.curdir, 'media', self.posts[self.currindex]['id'] + '.mp4')
-		if os.path.exists(dir):
+		if self.posts[self.currindex]['is_self'] :
+			self.stacked_media_layout.setCurrentIndex(1)
+			self.ImageLabel.setText(self.posts[self.currindex]['selftext'])
+		elif os.path.exists(dir):
 			self.VideoWindow.openFile(dir)
 			self.stacked_media_layout.setCurrentIndex(0)
 		else:
@@ -195,10 +208,10 @@ class MyWindow(QMainWindow):
 		print(self.settings)
 		self.display_simple_layout()
 		self.posts = []
-		self.posts = api.getPosts('GIFS', count=20)
+		self.posts = api.getPosts('ASKHISTORIANS', count=20)
 		#for i in self.settings['subreddits']:
 		#	self.posts.extend(api.getPosts(i, count=2))
-		self.buf = SimpleBuffer.Buffer(self.posts, 'media')
+		#self.buf = SimpleBuffer.Buffer(self.posts, 'media')
 		self.changemedia()
 		return
 
