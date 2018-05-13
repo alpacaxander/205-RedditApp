@@ -18,7 +18,7 @@ from PIL import Image
 dict = {}
 
 class MyWindow(QMainWindow):
-	def __init__(self):
+	def __init__(self):#set up login and simple_layout, show login, then after login show simple_layout
 		super().__init__()
 		self.settings = {'subreddits': []}
 		self.currindex = 0
@@ -29,20 +29,16 @@ class MyWindow(QMainWindow):
 		self.central_widget.setLayout(self.stacked_layout)
 		self.setCentralWidget(self.central_widget)
 
-	def display_simple_layout(self):
+	def display_simple_layout(self):#resize to prepare for switch to simple_layout
 		self.setWindowTitle("Simple Reddit Lauout - Group 10")
 		self.setWindowIcon(QIcon("icon.png"))
 		self.setGeometry(100,100,720,500)
 		self.stacked_layout.setCurrentIndex(1)
 
 	def simple_layout(self,):
-		#Simple Layout is housed in a vertical Layout
 		vert = QVBoxLayout()
-		#header is a vertical layout that holds the header info
 		header = QHBoxLayout()
-		#contentBox holds the content and the side bar
 		contentBox = QHBoxLayout()
-		#footerBox holds the footer
 		footerBox = QHBoxLayout()
 		#adding widgets to the layouts
 		#.addWidget(widget, weight of the layout)
@@ -60,7 +56,7 @@ class MyWindow(QMainWindow):
 		simplebox.setLayout(vert)
 		return simplebox
 
-	def login(self):
+	def login(self):#take in username and password to access reddit api
 		login = QVBoxLayout()
 		self.username = QLineEdit()
 		self.password = QLineEdit()
@@ -81,7 +77,7 @@ class MyWindow(QMainWindow):
 		loginbox.setLayout(login)
 		return loginbox
 
-	def content(self, title='this is title'):
+	def content(self):#where the content is displayed
 		voting = QVBoxLayout()
 		upvote = QPushButton('upvote')
 		downvote = QPushButton('downvote')
@@ -91,7 +87,7 @@ class MyWindow(QMainWindow):
 		votingbox.setLayout(voting)
 
 		vbox = QVBoxLayout()
-		prev = QPushButton('prev')
+		prev = QPushButton('prev')#change to next/prev post
 		next = QPushButton('next')
 		prev.clicked.connect(self.prevmedia)
 		next.clicked.connect(self.nextmedia)
@@ -100,18 +96,16 @@ class MyWindow(QMainWindow):
 		controlbox = QGroupBox('')
 		controlbox.setLayout(vbox)
 
-		self.title = QLabel()
+		self.title = QLabel()#to display title of post		
+		self.ImageLabel = QLabel()#to display images and text posts
+		self.VideoWindow = VideoWindow.VideoWindow(self)#to display videos/gifs
 		
-		self.ImageLabel = QLabel()
-		self.VideoWindow = VideoWindow.VideoWindow(self)
-		
-		self.stacked_media_layout = QStackedLayout()
+		self.stacked_media_layout = QStackedLayout()#switch between display methods
 		self.stacked_media_layout.addWidget(self.VideoWindow)
 		self.stacked_media_layout.addWidget(self.ImageLabel)
 		
 		mediaBox = QGroupBox('')
 		mediaBox.setLayout(self.stacked_media_layout)
-		
 		
 		contentVbox = QVBoxLayout()
 		contentVbox.addWidget(self.title)
@@ -130,12 +124,12 @@ class MyWindow(QMainWindow):
 		return self.contentbox
 
 	def header(self):
-		self.addSub = QLineEdit()
+		self.addSubText = QLineEdit()#input new sub to be added to next refreshContent
 		addSubButton = QPushButton('Add Sub')
 		addSubButton.clicked.connect(self.addSubReddit)
 		
 		headerContainer = QHBoxLayout()
-		headerContainer.addWidget(self.addSub)
+		headerContainer.addWidget(self.addSubText)
 		headerContainer.addWidget(addSubButton)
 		
 		gbox = QGroupBox('')
@@ -143,11 +137,14 @@ class MyWindow(QMainWindow):
 		return gbox
 
 	def sideBar(self):
-		subreddits = api.getSubreddits()
+		subreddits = ['PICS', 'GIFS', 'VIDEOS', 'WORLDNEWS']#default subs
 		self.subRedditButtons = QVBoxLayout()
+		self.spinBox = QSpinBox()
+		self.spinBox.setValue(5)#how many posts to get from each sub
+		self.subRedditButtons.addWidget(self.spinBox)
 		for r in subreddits:
-			temp = QPushButton(r['url'][3:-1])
-			self.settings['subreddits'].append(r['url'][3:-1])
+			temp = QPushButton(r)
+			self.settings['subreddits'].append(r.upper())
 			temp.clicked.connect(self.removeSubReddit)
 			self.subRedditButtons.addWidget(temp)
 
@@ -159,22 +156,26 @@ class MyWindow(QMainWindow):
 		vbox = QVBoxLayout()
 		contentlabel = QLabel()
 		vbox.addWidget(contentlabel)
-		linkButton = QPushButton('See post on reddit')
+		linkButton = QPushButton('See post url')#go to post url in default web browser
 		linkButton.clicked.connect(self.hyperlink)
 		vbox.addWidget(linkButton)
+		refreshButton = QPushButton('Refresh Content')#search for posts with new perameters
+		refreshButton.clicked.connect(self.refreshContent)
+		vbox.addWidget(refreshButton)
 		gbox = QGroupBox('')
 		gbox.setLayout(vbox)
 		
 		return gbox
 		
-	def addSubReddit(self):
-		newsub = self.addSub.text().upper()
+	def addSubReddit(self):#handle user adding new subreddits
+		newsub = self.addSubText.text().upper()
 		self.settings['subreddits'].append(newsub)
 		button = QPushButton(newsub)
 		button.clicked.connect(self.removeSubReddit)
 		self.subRedditButtons.addWidget(button)
 
-	def changemedia(self):
+	def changemedia(self):#handle displaying new post
+		print(self.posts[self.currindex]['url'])
 		self.title.setText(self.posts[self.currindex]['title'])
 		dir = os.path.join(os.path.curdir, 'media', self.posts[self.currindex]['id'] + '.mp4')
 		if self.posts[self.currindex]['is_self'] :
@@ -182,6 +183,7 @@ class MyWindow(QMainWindow):
 			self.ImageLabel.setText(self.posts[self.currindex]['selftext'])
 		elif os.path.exists(dir):
 			self.VideoWindow.openFile(dir)
+			self.VideoWindow.play()
 			self.stacked_media_layout.setCurrentIndex(0)
 		else:
 			hdr = { 'User-Agent' : 'Just a final project' }
@@ -189,9 +191,6 @@ class MyWindow(QMainWindow):
 			data = urlopen(req).read()
 			pixmap = QPixmap()
 			pixmap.loadFromData(data)
-			#if (pixmap.isNull()): # this will link to the imgur image rather than the imgurs page
-			#	data = urlopen(Request(self.posts[self.currindex]['url'] + '.jpg', headers=hdr)).read()
-			#	pixmap.loadFromData(data)
 			#fixedPixmap is to change the size of the media, default (1280, 720)
 			fixedPixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.FastTransformation)
 			self.ImageLabel.setPixmap(fixedPixmap)
@@ -211,15 +210,17 @@ class MyWindow(QMainWindow):
 		webbrowser.open(self.posts[self.currindex]['url'])
 	
 	def submitlogin(self):
-		print(self.settings)
 		self.display_simple_layout()
-		self.posts = []
-		self.posts = api.getPosts('ASKHISTORIANS', count=20)
-		#for i in self.settings['subreddits']:
-		#	self.posts.extend(api.getPosts(i, count=2))
-		#self.buf = SimpleBuffer.Buffer(self.posts, 'media')
-		self.changemedia()
+		self.refreshContent()
 		return
+		
+	def refreshContent(self):
+		self.currindex = 0
+		self.posts = []
+		for i in self.settings['subreddits']:
+			self.posts.extend(api.getPosts(i, count=self.spinBox.value()))
+		self.buf = SimpleBuffer.Buffer(self.posts, 'media')
+		self.changemedia()
 
 	def removeSubReddit(self):
 		self.settings['subreddits'].remove(self.sender().text())
