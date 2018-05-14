@@ -32,10 +32,11 @@ class MyWindow(QMainWindow):
 	def display_simple_layout(self):#resize to prepare for switch to simple_layout
 		self.setWindowTitle("Simple Reddit Lauout - Group 10")
 		self.setWindowIcon(QIcon("icon.png"))
-		self.setGeometry(100,100,720,500)
+		self.setGeometry(100,100,1080,900)
 		self.stacked_layout.setCurrentIndex(1)
 
 	def simple_layout(self,):
+		#Simple Layout is housed in a vertical Layout
 		vert = QVBoxLayout()
 		header = QHBoxLayout()
 		contentBox = QHBoxLayout()
@@ -57,22 +58,44 @@ class MyWindow(QMainWindow):
 		return simplebox
 
 	def login(self):#take in username and password to access reddit api
+		self.setWindowIcon(QIcon("icon.png"))
 		login = QVBoxLayout()
+		usrbox = QHBoxLayout()
+		passbox = QHBoxLayout()
+		btn = QHBoxLayout()
+		space = QHBoxLayout()
+		self.setGeometry(100,100,200,100)
 		self.username = QLineEdit()
 		self.password = QLineEdit()
 		self.username.setFixedWidth(200)
 		self.password.setFixedWidth(200)
+		self.spaces = QLabel("    ")
+		self.cred = QLabel("                                Reddit Desktop Application™")
 		self.usernameLabel = QLabel("Username : ")
 		self.passwordLabel = QLabel("Password : ")
-		submit = QPushButton('submit')
-		submit.clicked.connect(self.submitlogin)
-		submit.setFixedWidth(200)
-		submit.setFixedHeight(40)
-		login.addWidget(self.usernameLabel)
-		login.addWidget(self.username)
-		login.addWidget(self.passwordLabel)
-		login.addWidget(self.password)
-		login.addWidget(submit)
+		self.submit = QPushButton('submit')
+		self.submit.clicked.connect(self.submitlogin)
+		self.submit.setFixedWidth(200)
+		self.submit.setFixedHeight(40)
+		# login.addWidget(self.usernameLabel)
+		# login.addWidget(self.username)
+		# login.addWidget(self.passwordLabel)
+		# login.addWidget(self.password)
+		# login.addWidget(submit)
+		usrbox.addWidget(self.usernameLabel)
+		usrbox.addWidget(self.username)
+
+		space.addWidget(self.cred)
+
+		passbox.addWidget(self.passwordLabel)
+		passbox.addWidget(self.password)
+		btn.addWidget(self.spaces)
+		btn.addWidget(self.submit)
+		btn.addWidget(self.spaces)
+		login.addLayout(usrbox)
+		login.addLayout(passbox)
+		login.addLayout(btn)
+		login.addLayout(space)
 		loginbox = QGroupBox('')
 		loginbox.setLayout(login)
 		return loginbox
@@ -115,8 +138,8 @@ class MyWindow(QMainWindow):
 		mediabox.setLayout(contentVbox)
 
 		content = QHBoxLayout()
-		content.addWidget(controlbox)
-		content.addWidget(votingbox)
+		#content.addWidget(controlbox)
+		# content.addWidget(votingbox)
 		content.addWidget(mediabox)
 		self.contentbox = QGroupBox('')
 		self.contentbox.setLayout(content)
@@ -124,14 +147,14 @@ class MyWindow(QMainWindow):
 		return self.contentbox
 
 	def header(self):
-		self.addSubText = QLineEdit()#input new sub to be added to next refreshContent
+		self.addSub = QLineEdit()
 		addSubButton = QPushButton('Add Sub')
 		addSubButton.clicked.connect(self.addSubReddit)
-		
+
 		headerContainer = QHBoxLayout()
-		headerContainer.addWidget(self.addSubText)
+		headerContainer.addWidget(self.addSub)
 		headerContainer.addWidget(addSubButton)
-		
+
 		gbox = QGroupBox('')
 		gbox.setLayout(headerContainer)
 		return gbox
@@ -141,40 +164,51 @@ class MyWindow(QMainWindow):
 		self.subRedditButtons = QVBoxLayout()
 		self.spinBox = QSpinBox()
 		self.spinBox.setValue(5)#how many posts to get from each sub
-		self.subRedditButtons.addWidget(self.spinBox)
+		
+		self.scroll = QScrollArea(self)
+		self.scroll.setWidgetResizable(True)
+		self.scroll.setFixedWidth(180)
+		self.subRedditButtons.addWidget(self.scroll)
+		scrollContent = QWidget(self.scroll)
+		self.scrollLayout = QVBoxLayout(scrollContent)
+		scrollContent.setLayout(self.scrollLayout)
+		self.scrollLayout.addWidget(self.spinBox)
 		for r in subreddits:
 			temp = QPushButton(r)
 			self.settings['subreddits'].append(r.upper())
 			temp.clicked.connect(self.removeSubReddit)
-			self.subRedditButtons.addWidget(temp)
+			self.scrollLayout.addWidget(temp)
+		self.scroll.setWidget(scrollContent)
+		return self.scroll
 
-		gbox = QGroupBox()
-		gbox.setLayout(self.subRedditButtons)
-		return gbox
-		
 	def footer(self):
-		vbox = QVBoxLayout()
-		contentlabel = QLabel()
-		vbox.addWidget(contentlabel)
-		linkButton = QPushButton('See post url')#go to post url in default web browser
-		linkButton.clicked.connect(self.hyperlink)
-		vbox.addWidget(linkButton)
+		hbox = QHBoxLayout()
+		prev = QPushButton('prev')
+		next = QPushButton('next')
 		refreshButton = QPushButton('Refresh Content')#search for posts with new perameters
+		linkButton = QPushButton('See post url')#go to post url in default web browser
+		prev.clicked.connect(self.prevmedia)
+		next.clicked.connect(self.nextmedia)
+		linkButton.clicked.connect(self.hyperlink)
 		refreshButton.clicked.connect(self.refreshContent)
-		vbox.addWidget(refreshButton)
+		contentlabel = QLabel('                                                 ')
+		hbox.addWidget(contentlabel)
+		hbox.addWidget(prev)
+		hbox.addWidget(next)
+		hbox.addWidget(refreshButton)
+		hbox.addWidget(linkButton)
 		gbox = QGroupBox('')
-		gbox.setLayout(vbox)
-		
+		gbox.setLayout(hbox)
 		return gbox
-		
-	def addSubReddit(self):#handle user adding new subreddits
-		newsub = self.addSubText.text().upper()
+
+	def addSubReddit(self):
+		newsub = self.addSub.text().upper()
 		self.settings['subreddits'].append(newsub)
 		button = QPushButton(newsub)
 		button.clicked.connect(self.removeSubReddit)
-		self.subRedditButtons.addWidget(button)
+		self.scrollLayout.addWidget(button)
 
-	def changemedia(self):#handle displaying new post
+	def changemedia(self):
 		print(self.posts[self.currindex]['url'])
 		self.title.setText(self.posts[self.currindex]['title'])
 		dir = os.path.join(os.path.curdir, 'media', self.posts[self.currindex]['id'] + '.mp4')
@@ -191,7 +225,6 @@ class MyWindow(QMainWindow):
 			data = urlopen(req).read()
 			pixmap = QPixmap()
 			pixmap.loadFromData(data)
-			#fixedPixmap is to change the size of the media, default (1280, 720)
 			fixedPixmap = pixmap.scaled(640, 480, Qt.KeepAspectRatio, Qt.FastTransformation)
 			self.ImageLabel.setPixmap(fixedPixmap)
 			self.stacked_media_layout.setCurrentIndex(1)
