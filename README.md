@@ -2,7 +2,11 @@
 
 <p align="right"><a href="https://www.python.org/downloads/release/python-360/"><img src="https://img.shields.io/badge/Python-3.6-blue.svg"/></a></p>  
 
+Course: Cst - 205
+Submission: 5/15/2018
+
 A Python-based application that allows users to browse their favorite subreddits from the comfort of a desktop app.
+
 
 ## Install
 
