@@ -21,7 +21,7 @@ cd 205-RedditApp
 # Install program dependencies
 pip3 install -r requirements.txt
 
-#run program
+# Run program
 py window.py
 ```
 
