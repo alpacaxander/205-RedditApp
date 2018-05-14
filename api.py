@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+'''
+Course: CST205-01
+Title: RedditApp (final project)
+Abstract: A desktop app that can browse reddit
+Authors: Kyle Hays, Alexander Paulsell, Anthony Zerka, Brett Stevenson
+Date: 14 may 2018
+'''
+#Authors: Brett Stevenson
+#Abstract: Interface for using/getting api calls to reddit
 import praw
 from config import creds
 
