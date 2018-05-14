@@ -1,3 +1,5 @@
+youtube_dl==2018.3.20
+cryptography==2.1.4
 praw==5.4.0
-cryptography==2.2.2
-youtube_dl==2018.4.25
+Pillow==5.1.0
+PyQt5==5.10.1
